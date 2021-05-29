@@ -106,19 +106,19 @@ def apply_on_dataset(meteo_df, stations_df, features_to_move, stations_ids,
     new_station_info.to_csv(save_path, index=False)
 
 
-meteo_df = pd.read_csv('../first_data/track_2_package/meteo_1day.csv')
-meteo_df['date'] = pd.to_datetime(meteo_df['date'])
+meteo_df = pd.read_csv('../first_data/track_2_package/meteo_3hours.csv')
+meteo_df['date'] = pd.to_datetime(meteo_df['date_local'])
 
 stations_df = pd.read_csv('../first_data/track_2_package/train.csv')
 stations_df['date'] = pd.to_datetime(stations_df['date'])
 
 apply_on_dataset(meteo_df=meteo_df,
                  stations_df=stations_df,
-                 features_to_move=['snow_height', 'snow_coverage_station'],
+                 features_to_move=['air_temperature', 'relative_humidity', 'pressure'],
                  knn_model=KNeighborsRegressor,
-                 n_neighbors=2,
-                 save_path='meteo_1day_int.csv',
-                 stations_ids=[3019, 3027, 3028, 3030, 3035, 3041, 3045, 3230, 3050])
+                 n_neighbors=1,
+                 save_path='gap_meteo_3hour_int_3036_press.csv',
+                 stations_ids=[3036])
 
 # Гидрологические посты
 # 3019, 3027, 3028, 3030, 3035, 3041, 3045, 3230, 3050
