@@ -116,5 +116,9 @@ apply_on_dataset(meteo_df=meteo_df,
                  features_to_move=['wind_direction', 'wind_speed_aver', 'precipitation'],
                  knn_model=KNeighborsRegressor,
                  n_neighbors=1,
-                 save_path='meteo_3h_int.csv',
-                 stations_ids=[3019, 3027, 3028, 3030, 3035, 3041, 3045, 3230, 3050])
+                 save_path='meteo3019_3h_int.csv',
+                 stations_ids=[3019])
+
+# Гидрологические посты
+# 3019, 3027, 3028, 3030, 3035, 3041, 3045, 3230, 3050
+# 3029
