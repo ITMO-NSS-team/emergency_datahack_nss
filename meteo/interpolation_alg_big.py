@@ -93,7 +93,6 @@ def apply_on_dataset(meteo_df, stations_df, features_to_move, stations_ids,
             # Датафрем с интерполированными значениями
             new_station_info = pd.DataFrame(new_f_values, columns=features_to_move)
             new_station_info['station_id'] = [station_id] * len(new_station_info)
-            new_station_info.to_csv('file.csv')
         else:
             new_dataframe = pd.DataFrame(new_f_values, columns=features_to_move)
             new_dataframe['station_id'] = [station_id] * len(new_dataframe)
@@ -106,20 +105,16 @@ def apply_on_dataset(meteo_df, stations_df, features_to_move, stations_ids,
     new_station_info.to_csv(save_path, index=False)
 
 
-meteo_df = pd.read_csv('../first_data/track_2_package/meteo_1day.csv')
-meteo_df['date'] = pd.to_datetime(meteo_df['date'])
+meteo_df = pd.read_csv('../first_data/track_2_package/meteo_3hours.csv')
+meteo_df['date'] = pd.to_datetime(meteo_df['date_local'])
 
 stations_df = pd.read_csv('../first_data/track_2_package/train.csv')
 stations_df['date'] = pd.to_datetime(stations_df['date'])
 
 apply_on_dataset(meteo_df=meteo_df,
                  stations_df=stations_df,
-                 features_to_move=['snow_height', 'snow_coverage_station'],
+                 features_to_move=['wind_direction', 'wind_speed_aver', 'precipitation'],
                  knn_model=KNeighborsRegressor,
-                 n_neighbors=2,
-                 save_path='meteo_1day_int.csv',
+                 n_neighbors=1,
+                 save_path='meteo_3h_int.csv',
                  stations_ids=[3019, 3027, 3028, 3030, 3035, 3041, 3045, 3230, 3050])
-
-# Гидрологические посты
-# 3019, 3027, 3028, 3030, 3035, 3041, 3045, 3230, 3050
-# 3029
