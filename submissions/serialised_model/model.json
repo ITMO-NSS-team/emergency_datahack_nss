@@ -1,0 +1,106 @@
+{
+    "total_chain_operations": {
+        "smoothing": 1,
+        "lagged": 2,
+        "ridge": 3
+    },
+    "depth": 4,
+    "nodes": [
+        {
+            "operation_id": 3,
+            "operation_type": "smoothing",
+            "operation_name": "TsSmoothingImplementation",
+            "custom_params": "default_params",
+            "params": {
+                "window_size": 10
+            },
+            "nodes_from": [],
+            "fitted_operation_path": "fitted_operations\\operation_3.pkl"
+        },
+        {
+            "operation_id": 2,
+            "operation_type": "lagged",
+            "operation_name": "LaggedTransformationImplementation",
+            "custom_params": "default_params",
+            "params": {
+                "window_size": 10
+            },
+            "nodes_from": [
+                3
+            ],
+            "fitted_operation_path": "fitted_operations\\operation_2.pkl"
+        },
+        {
+            "operation_id": 1,
+            "operation_type": "ridge",
+            "operation_name": "Ridge",
+            "custom_params": "default_params",
+            "params": {
+                "alpha": 1.0,
+                "copy_X": true,
+                "fit_intercept": true,
+                "max_iter": null,
+                "normalize": false,
+                "random_state": null,
+                "solver": "auto",
+                "tol": 0.001
+            },
+            "nodes_from": [
+                2
+            ],
+            "fitted_operation_path": "fitted_operations\\operation_1.pkl"
+        },
+        {
+            "operation_id": 5,
+            "operation_type": "lagged",
+            "operation_name": "LaggedTransformationImplementation",
+            "custom_params": "default_params",
+            "params": {
+                "window_size": 10
+            },
+            "nodes_from": [],
+            "fitted_operation_path": "fitted_operations\\operation_5.pkl"
+        },
+        {
+            "operation_id": 4,
+            "operation_type": "ridge",
+            "operation_name": "Ridge",
+            "custom_params": "default_params",
+            "params": {
+                "alpha": 1.0,
+                "copy_X": true,
+                "fit_intercept": true,
+                "max_iter": null,
+                "normalize": false,
+                "random_state": null,
+                "solver": "auto",
+                "tol": 0.001
+            },
+            "nodes_from": [
+                5
+            ],
+            "fitted_operation_path": "fitted_operations\\operation_4.pkl"
+        },
+        {
+            "operation_id": 0,
+            "operation_type": "ridge",
+            "operation_name": "Ridge",
+            "custom_params": "default_params",
+            "params": {
+                "alpha": 1.0,
+                "copy_X": true,
+                "fit_intercept": true,
+                "max_iter": null,
+                "normalize": false,
+                "random_state": null,
+                "solver": "auto",
+                "tol": 0.001
+            },
+            "nodes_from": [
+                1,
+                4
+            ],
+            "fitted_operation_path": "fitted_operations\\operation_0.pkl"
+        }
+    ]
+}
