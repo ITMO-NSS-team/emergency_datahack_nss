@@ -131,7 +131,7 @@ def opt_equation(params, *variables):
     print(res, res.shape)#, np.sum(res) ** 2, (np.sum(res) ** 2).shape)
     return res
     
-class discharge_model(object):
+class Discharge_model(object):
     def __init__(self):
         self.params_list = ['snow_runoff', 'rain_runoff', 'discharge_recession',
                             'degree_day_factor', 'downstream flow']
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     meteo_integrated_spring = meteo_integrated.loc[mask]
     meteo_integrated_spring = meteo_integrated_spring.dropna()    
     meteo_integrated_spring.head()
-    dm = discharge_model()
+    dm = Discharge_model()
 
 #    temps = np.empty(data.shape[1])
 #    degree_days = temps + lapse * (h_mean - h_st) * 0.01
