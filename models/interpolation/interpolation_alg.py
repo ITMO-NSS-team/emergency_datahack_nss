@@ -2,12 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neighbors import KNeighborsRegressor
-from scipy import optimize
-from copy import copy
 
 from matplotlib import pyplot as plt
-import datetime
-
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -24,7 +20,8 @@ def apply_on_dataset(meteo_df: pd.DataFrame, stations_df: pd.DataFrame,
     "гидропосты"
     :param stations_ids: список идентефикаторов станций
     :param n_neighbors: количество соседей, по которым интерполируются значения
-    :param knn_model: алгоритм для расчета значений
+    :param knn_model: алгоритм для расчета значений (можно использовать классификатор
+    или регрессор в зависимости от природы признаков)
     :param save_path: куда требуется сохранить интерполированные данные
     :param vis_station_stage: требуется ли отрисовывать графики уровней
     """
@@ -58,14 +55,6 @@ def apply_on_dataset(meteo_df: pd.DataFrame, stations_df: pd.DataFrame,
             start_date = min(station_df_local['date'])
             end_date = max(station_df_local['date'])
             all_dates = pd.date_range(start_date, end_date)
-
-            if vis_station_stage:
-                plt.plot(station_df_local['date'], station_df_local['stage_max_hydro'])
-                plt.xlabel('Дата', fontsize=15)
-                plt.ylabel('Максимальное значение уровня, см', fontsize=15)
-                plt.title(f'Hydro station id - {station_id}')
-                plt.show()
-
             for current_date in all_dates:
                 # Получаем объединенные данные для выбранного срока - один день
                 merged_current = merged[merged['date'] == current_date]
@@ -93,6 +82,22 @@ def apply_on_dataset(meteo_df: pd.DataFrame, stations_df: pd.DataFrame,
 
                 interpolated_values.append(interpolated_v)
 
+            if vis_station_stage:
+                # Отрисовка графика хода уровней и параметра, который интерполировался
+                fig, ax1 = plt.subplots()
+                ax1.set_xlabel('Дата')
+                ax1.set_ylabel('Максимальное значение уровня, см')
+                ax1.plot(station_df_local['date'], station_df_local['stage_max_hydro'], c='blue')
+                ax1.tick_params(axis='y')
+                plt.grid(c='#DCDCDC')
+
+                ax2 = ax1.twinx()
+                ax2.plot(station_df_local['date'], interpolated_values, c='orange')
+                ax2.tick_params(axis='y')
+                ax2.set_ylabel(feature)
+                plt.title(f'Hydro station id - {station_id}')
+                plt.show()
+
             if index == 0:
                 # Добавляем даты
                 dates.extend(all_dates)
@@ -106,7 +111,6 @@ def apply_on_dataset(meteo_df: pd.DataFrame, stations_df: pd.DataFrame,
             # Датафрем с интерполированными значениями
             new_station_info = pd.DataFrame(new_f_values, columns=features_to_move)
             new_station_info['station_id'] = [station_id] * len(new_station_info)
-            new_station_info.to_csv('file.csv')
         else:
             new_dataframe = pd.DataFrame(new_f_values, columns=features_to_move)
             new_dataframe['station_id'] = [station_id] * len(new_dataframe)
@@ -117,26 +121,3 @@ def apply_on_dataset(meteo_df: pd.DataFrame, stations_df: pd.DataFrame,
 
     new_station_info['date'] = dates
     new_station_info.to_csv(save_path, index=False)
-
-# Гидрологические посты для которых требуются данные
-# 3019, 3027, 3028, 3029, 3030, 3035, 3041, 3045, 3230, 3050
-
-# Параметры 3h - 'air_temperature', 'relative_humidity', 'pressure' - press
-# 'wind_direction', 'wind_speed_aver', 'precipitation' - wind
-
-# Параметры 1day - 'snow_coverage_station', 'snow_height'
-
-meteo_df = pd.read_csv('../../first_data/track_2_package/meteo_1day.csv')
-meteo_df['date'] = pd.to_datetime(meteo_df['date'])
-
-stations_df = pd.read_csv('../../first_data/track_2_package/train.csv')
-stations_df['date'] = pd.to_datetime(stations_df['date'])
-
-apply_on_dataset(meteo_df=meteo_df,
-                 stations_df=stations_df,
-                 features_to_move=['snow_coverage_station', 'snow_height'],
-                 knn_model=KNeighborsRegressor,
-                 n_neighbors=3,
-                 save_path='gap_meteo_3036.csv',
-                 stations_ids=[3036],
-                 vis_station_stage=True)
