@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 
-from models.multitarget.aggregation import convert_water_codes, ts_to_table
+from models.multitarget.aggregation import convert_water_codes, ts_to_table, feature_aggregation
 
 """ Ниже представлен алгоритм формирования multi-target таблци на агрегированных 
 признаках для подачи их в алгоритм прогнозирования 
@@ -45,14 +45,37 @@ if __name__ == '__main__':
         snow_data = pd.read_csv(os.path.join(meteo_1d_path, snow_name),
                                 parse_dates=['date'])
 
+        # Данные по температуре и ветру (его скорости и направлению)
+        tmp_name = ''.join(('no_gap_meteo_3hour_int_', str(station_id), '_wind.csv'))
+        tmp_data = pd.read_csv(os.path.join(meteo_3h_path, tmp_name),
+                               parse_dates=['date'])
+
         # Объединяем датафреймы по столбцу "дата"
         merged_df = pd.merge(station_df, snow_data, on='date')
+        merged_df = pd.merge(merged_df, tmp_data, on='date')
         merged_df = merged_df.sort_values(by=['date'])
 
         # Готовим датафрейм
         window_size = 8
         idx = np.arange(merged_df.shape[0] - window_size) + 1
+
+        merged_df[target_column] = merged_df[[target_column]].interpolate(method='linear')[target_column]
         target_arr = merged_df[target_column]
+
         _, trs_target = ts_to_table(idx, target_arr, window_size)
 
-        # TODO дописать функцию генерации таблиц многомерной регрессии
+        merged_df = merged_df.iloc[:-window_size, :]
+
+        new_df = pd.DataFrame(data=trs_target, columns=main_columns, index=target_arr.index[:-window_size])
+        new_df = pd.concat([merged_df, new_df], axis=1, join='inner')
+        new_df.drop(['0_day'], axis=1, inplace=True)
+
+        ######################
+        #  Агрегация данных  #
+        ######################
+        aggregated_df = feature_aggregation(new_df)
+        column_list = ['date', 'stage_max_amplitude', 'stage_max_mean', 'snow_coverage_station_amplitude',
+                       'snow_height_mean', 'snow_height_amplitude', 'water_hazard_sum', '1_day', '2_day',
+                       '3_day', '4_day', '5_day', '6_day', '7_day']
+        aggregated_df = aggregated_df[column_list]
+        a = 0

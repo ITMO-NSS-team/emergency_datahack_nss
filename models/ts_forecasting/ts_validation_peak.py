@@ -14,6 +14,7 @@ rcParams['figure.figsize'] = 15, 7
 #                        основе in-sample прогнозироования                     #
 ################################################################################
 # Что такое in-sample прогнозирование - https://habr.com/ru/post/559796/
+# Валидация проводится не на "пологих" участках, а в период половодья
 
 
 def validation(chain, predict_input, forecast_length, validation_blocks,
@@ -129,6 +130,9 @@ if __name__ == '__main__':
             # Если в архиве всё таки остались пропуски - убираем их
             station_train['stage_max'] = station_train[['stage_max']].interpolate(method='linear')['stage_max']
             time_series = np.ravel(np.array(station_train['stage_max']))
+            # Смещаемся на 330 суток назад и смотрим как хорошо данный участок
+            # будет повторять прогноз
+            time_series = time_series[:-330]
 
             # Для сокращения времени обучения всегда берем только последние 2000
             # значений временного ряда для тренировки

@@ -95,31 +95,37 @@ def convert_water_codes(value):
     return res
 
 
-def feature_aggregation(new_df):
-    columns = new_df.columns
+def feature_aggregation(dataframe: pd.DataFrame):
+    """ Функция агрегирует знаения по столбцам """
+    columns = dataframe.columns
     columns_drop = []
 
     if 'discharge' in columns:
-        new_df['discharge_mean'] = days_agg(new_df, 'discharge', 'mean', 4)
+        # Расход - среднее за 7 суток
+        dataframe['discharge_mean'] = days_agg(dataframe, 'discharge', 'mean', 7)
         columns_drop.append('discharge')
-    if 'stage_avg' in columns:
-        new_df['stage_avg_amplitude'] = days_agg(new_df, 'stage_avg', 'amplitude', 7)
-        new_df['stage_avg_mean'] = days_agg(new_df, 'stage_avg', 'mean', 4)
-        columns_drop.append('stage_avg')
+    if 'stage_max' in columns:
+        # Целевая переменная - среднее и амплитуда за 7 и 3 суток
+        dataframe['stage_max_amplitude'] = days_agg(dataframe, 'stage_max', 'amplitude', 7)
+        dataframe['stage_max_mean'] = days_agg(dataframe, 'stage_max', 'mean', 4)
     if 'snow_coverage_station' in columns:
-        new_df['snow_coverage_station_amplitude'] = days_agg(new_df, 'snow_coverage_station', 'amplitude', 7)
+        # Доля снежного покрова - амплитуда за 30 суток
+        dataframe['snow_coverage_station_amplitude'] = days_agg(dataframe, 'snow_coverage_station', 'amplitude', 30)
         columns_drop.append('snow_coverage_station')
     if 'snow_height' in columns:
-        new_df['snow_height_mean'] = days_agg(new_df, 'snow_height', 'mean', 4)
-        new_df['snow_height_amplitude'] = days_agg(new_df, 'snow_height', 'amplitude', 7)
+        # Высота снежного покрова
+        dataframe['snow_height_mean'] = days_agg(dataframe, 'snow_height', 'mean', 15)
+        dataframe['snow_height_amplitude'] = days_agg(dataframe, 'snow_height', 'amplitude', 20)
         columns_drop.append('snow_height')
     if 'precipitation' in columns:
-        new_df['precipitation_sum'] = days_agg(new_df, 'precipitation', 'sum', 30)
+        # Сумма осадков за 20 суток
+        dataframe['precipitation_sum'] = days_agg(dataframe, 'precipitation', 'sum', 20)
         columns_drop.append('precipitation')
     if 'water_hazard' in columns:
-        new_df['water_hazard_sum'] = days_agg(new_df, 'water_hazard', 'sum', 2)
+        # Сумма кодов произошедших событий за 2 суток
+        dataframe['water_hazard_sum'] = days_agg(dataframe, 'water_hazard', 'sum', 2)
         columns_drop.append('water_hazard')
 
-    new_df.drop(columns_drop, axis=1, inplace=True)
+    dataframe.drop(columns_drop, axis=1, inplace=True)
 
-    return new_df
+    return dataframe
