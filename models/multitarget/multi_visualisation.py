@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore')
 
 
 def two_axis_plot(df, feature='snow_coverage_station_amplitude'):
-    # Функция для отрисовка
+    # Функция для отрисовки
     fig, ax1 = plt.subplots()
     ax1.set_xlabel('Дата')
     ax1.set_ylabel('Максимальное значение уровня, см')
@@ -28,7 +28,7 @@ def two_axis_plot(df, feature='snow_coverage_station_amplitude'):
 # stage_max_amplitude, stage_max_mean, snow_coverage_station_amplitude,
 # snow_height_mean, snow_height_amplitude, water_hazard_sum
 path_with_files = '../../data/multi_target'
-stations = [3041]
+stations = [3019]
 for i in stations:
     file_name = ''.join(('multi_', str(i), '.csv'))
     df = pd.read_csv(os.path.join(path_with_files, file_name),
@@ -41,6 +41,7 @@ for i in stations:
 
     # Сумма рангов кодов режимной группы за определённый период
     two_axis_plot(df, 'water_hazard_sum')
+    two_axis_plot(df, 'snow_height_amplitude')
     two_axis_plot(df, 'stage_max_amplitude')
 
 

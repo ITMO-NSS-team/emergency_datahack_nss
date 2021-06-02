@@ -39,6 +39,7 @@ def days_agg(dataframe: pd.DataFrame, column_name: str, agg_func: str, days: int
         'sum': np.sum,
         'std': np.std,
         'amplitude': lambda x: np.max(x) - np.min(x),
+        'first_minus_last': lambda x: x[0] - x[-1],
         'occ': occ
     }
 
@@ -115,7 +116,7 @@ def feature_aggregation(dataframe: pd.DataFrame):
     if 'snow_height' in columns:
         # Высота снежного покрова
         dataframe['snow_height_mean'] = days_agg(dataframe, 'snow_height', 'mean', 15)
-        dataframe['snow_height_amplitude'] = days_agg(dataframe, 'snow_height', 'amplitude', 20)
+        dataframe['snow_height_amplitude'] = days_agg(dataframe, 'snow_height', 'first_minus_last', 30)
         columns_drop.append('snow_height')
     if 'precipitation' in columns:
         # Сумма осадков за 20 суток

@@ -1,5 +1,6 @@
 import pandas as pd
 from models.ts_forecasting.ts_forecasting_algs import *
+from models.calculate_levels import convert_max_into_delta
 
 
 if __name__ == '__main__':
