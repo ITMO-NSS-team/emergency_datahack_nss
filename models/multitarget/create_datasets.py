@@ -16,6 +16,8 @@ from models.multitarget.aggregation import convert_water_codes, ts_to_table, fea
 """
 
 if __name__ == '__main__':
+    # Папка, в которую сохраняются данные
+    path_to_save = '../../data/multi_target'
     main_columns = ['0_day', '1_day', '2_day', '3_day', '4_day', '5_day', '6_day', '7_day']
     target_column = 'stage_max'
 
@@ -78,4 +80,8 @@ if __name__ == '__main__':
                        'snow_height_mean', 'snow_height_amplitude', 'water_hazard_sum', '1_day', '2_day',
                        '3_day', '4_day', '5_day', '6_day', '7_day']
         aggregated_df = aggregated_df[column_list]
-        a = 0
+
+        file_name = ''.join(('multi_', str(station_id), '.csv'))
+        aggregated_df.to_csv(os.path.join(path_to_save, file_name), index=False)
+
+
