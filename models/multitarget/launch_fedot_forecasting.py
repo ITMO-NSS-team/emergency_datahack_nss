@@ -1,4 +1,3 @@
-import datetime
 import os
 import warnings
 
@@ -12,7 +11,7 @@ warnings.filterwarnings('ignore')
 if __name__ == '__main__':
     path_with_files = '../../data/multi_target'
     df_submit = pd.read_csv('../../submissions/sample_submissions/sample_sub_4.csv', parse_dates=['date'])
-    forecasts = []
+
     for station_id in df_submit['station_id'].unique():
         print(f'\nПредсказание формируется для станции {station_id}')
 
@@ -44,7 +43,6 @@ if __name__ == '__main__':
 
             # Функция перерасчета предсказанных значений stage_max в delta_stage_max
             deltas = convert_max_into_delta(current_level, predict)
-            forecasts.extend(deltas)
             station_forecasts.extend(deltas)
 
         df_submit_station['delta_stage_max'] = station_forecasts
@@ -52,8 +50,3 @@ if __name__ == '__main__':
         file_name = ''.join(('model_2_station_', str(station_id), '_.csv'))
 
         df_submit_station.to_csv(os.path.join(path_for_save, file_name), index=False)
-
-    # Записываем предсказания в датафрейм
-    df_submit['delta_stage_max'] = forecasts
-    # Сохраняем в файл
-    df_submit.to_csv('../../submissions/submission_data/predict_sub_4_model_2.csv', index=False)
