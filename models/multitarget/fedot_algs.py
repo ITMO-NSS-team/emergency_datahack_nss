@@ -42,20 +42,7 @@ def dataframe_into_inputs(dataframe):
     return input_data
 
 
-def fedot_fit_predict(station_train: pd.DataFrame,
-                      station_predict_features: pd.DataFrame,
-                      num_of_generations: int = 10):
-    """ Функция запускает композирование цепочки и после обучения даёт прогноз
-
-    :param station_train:
-    :param station_predict_features:
-    :param num_of_generations:
-    """
-
-    # Wrap dataframe into output
-    train_data = dataframe_into_inputs(station_train)
-    test_data = dataframe_into_inputs(station_predict_features)
-
+def fedot_fit(train_data, num_of_generations):
     # Create simple chain
     node_scaling = PrimaryNode('scaling')
     node_ridge = SecondaryNode('rfr', nodes_from=[node_scaling])
@@ -88,6 +75,26 @@ def fedot_fit_predict(station_train: pd.DataFrame,
 
     # Fit chain after composing
     obtained_chain.fit(train_data)
+
+    return obtained_chain
+
+
+def fedot_fit_predict(station_train: pd.DataFrame,
+                      station_predict_features: pd.DataFrame,
+                      num_of_generations: int = 10):
+    """ Функция запускает композирование цепочки и после обучения даёт прогноз
+
+    :param station_train:
+    :param station_predict_features:
+    :param num_of_generations:
+    """
+
+    # Wrap dataframe into output
+    train_data = dataframe_into_inputs(station_train)
+    test_data = dataframe_into_inputs(station_predict_features)
+
+    obtained_chain = fedot_fit(train_data, num_of_generations)
+
     predicted_output = obtained_chain.predict(test_data)
     # Convert output into one dimensional array
     forecast = np.ravel(np.array(predicted_output.predict))

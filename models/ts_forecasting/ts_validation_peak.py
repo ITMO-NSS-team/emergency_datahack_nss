@@ -17,16 +17,18 @@ rcParams['figure.figsize'] = 15, 7
 # Валидация проводится не на "пологих" участках, а в период половодья
 
 
-def validation(chain, predict_input, forecast_length, validation_blocks,
+def validation(chain, predict_input, dates, forecast_length, validation_blocks,
                source_time_series):
     """ Function for validation time series forecasts on several blocks
 
     :param chain: fitted Chain object
     :param predict_input: InputData for prediction
+    :param dates: series with dates
     :param forecast_length: forecast length
     :param validation_blocks: amount of blocks for validation
     :param source_time_series: array with time series
     """
+    dates = dates.reset_index()
 
     # Make in-sample prediction
     horizon = 7 * validation_blocks
@@ -43,25 +45,30 @@ def validation(chain, predict_input, forecast_length, validation_blocks,
     print(f'RMSE - {mse_metric:.2f}\n')
 
     # Plot time series forecasted
-    plt.plot(range(0, len(source_time_series)), source_time_series, c='green', label='Actual time series')
-    plt.plot(range(len(pre_history), len(source_time_series)), predicted_values, c='blue', label='Forecast')
+    plt.plot(dates, source_time_series, c='green', label='Actual time series')
+    start_date = dates.iloc[len(pre_history)]
+    end_date = dates.iloc[-1]
+    forecast_date_range = pd.date_range(start_date['date'], end_date['date'])
+    plt.plot(forecast_date_range, predicted_values, c='blue', label='Forecast')
 
     i = len(pre_history)
     for _ in range(0, validation_blocks):
         deviation = np.std(predicted_values)
-        plt.plot([i, i], [min(actual_values) - deviation, max(actual_values) + deviation],
+        plt.plot([dates.iloc[i]['date'], dates.iloc[i]['date']],
+                 [min(actual_values) - deviation, max(actual_values) + deviation],
                  c='black', linewidth=1)
         i += forecast_length
 
     plt.legend(fontsize=15)
     start_view_point = len(source_time_series) - horizon - 360
-    plt.xlim(start_view_point, len(source_time_series))
-    plt.xlabel('Time index', fontsize=15)
+    plt.xlim(dates.iloc[start_view_point]['date'],
+             dates.iloc[-1]['date'])
+    plt.xlabel('Дата', fontsize=15)
     plt.ylabel('Максимальное значение уровня, см', fontsize=15)
     plt.show()
 
 
-def run_validation(time_series, tune_chain=False):
+def run_validation(time_series, dates, tune_chain=False):
     # We will use 3 blocks for validation
     task = Task(TaskTypesEnum.ts_forecasting,
                 TsForecastingParams(forecast_length=7))
@@ -102,7 +109,7 @@ def run_validation(time_series, tune_chain=False):
             print(f' Operation {node.operation}, - {node.custom_params}')
 
     # Perform validation
-    validation(chain, validation_input,
+    validation(chain, validation_input, dates,
                forecast_length=7,
                validation_blocks=validation_blocks,
                source_time_series=time_series)
@@ -133,9 +140,11 @@ if __name__ == '__main__':
             # Смещаемся на 330 суток назад и смотрим как хорошо данный участок
             # будет повторять прогноз
             time_series = time_series[:-330]
+            cutted = station_train['date'].head(len(station_train)-330)
 
             # Для сокращения времени обучения всегда берем только последние 2000
             # значений временного ряда для тренировки
             if len(time_series) > 2000:
                 time_series = time_series[-2000:]
-            run_validation(time_series, tune_chain=True)
+                cutted = cutted.tail(2000)
+            run_validation(time_series, cutted, tune_chain=True)

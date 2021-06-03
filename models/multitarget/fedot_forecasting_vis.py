@@ -5,31 +5,20 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from fedot.core.chains.chain import Chain
-from fedot.core.chains.node import PrimaryNode, SecondaryNode
-from fedot.core.composer.optimisers.gp_comp.gp_optimiser import GPChainOptimiserParameters
-from fedot.core.composer.optimisers.gp_comp.operators.mutation import MutationTypesEnum
-from fedot.core.composer.gp_composer.gp_composer import \
-    GPComposerBuilder, GPComposerRequirements
-from fedot.core.data.data import InputData
-from fedot.core.repository.dataset_types import DataTypesEnum
-from fedot.core.repository.quality_metrics_repository import \
-    MetricsRepository, RegressionMetricsEnum
-from fedot.core.repository.tasks import Task, TaskTypesEnum
-from models.multitarget.fedot_algs import dataframe_into_inputs
+from models.multitarget.fedot_algs import dataframe_into_inputs, fedot_fit
+from pylab import rcParams
+rcParams['figure.figsize'] = 15, 7
 
 
 def multi_validation(station_train, val_blocks=3):
-    # Create simple chain
-    node_rfr = PrimaryNode('rfr')
-    chain = Chain(node_rfr)
-
     horizon = val_blocks * 7
     cutted_df = station_train.head(len(station_train) - horizon)
     val_df = station_train.tail(horizon)
 
     train_input = dataframe_into_inputs(cutted_df)
-    chain.fit(train_input)
+
+    # Get chain after composing
+    chain = fedot_fit(train_input, num_of_generations=10)
 
     forecasts = []
     for i in range(0, horizon, 7):
@@ -40,8 +29,34 @@ def multi_validation(station_train, val_blocks=3):
         forecast = list(np.ravel(np.array(preds.predict)))
         forecasts.extend(forecast)
 
-    # TODO добавить визуализации
-    print(forecasts)
+    forecasts_df = pd.DataFrame({'date': val_df['date'], 'predict': forecasts})
+
+    # Convert station_train into time-series dataframe
+    station_train['stage_max'] = station_train['1_day'].shift(1)
+    # Remove first row
+    station_train = station_train.tail(len(station_train) - 1)
+    new_forecasts_df = pd.merge(forecasts_df, station_train, on='date')
+
+    plt.plot(station_train['date'], station_train['stage_max'], c='green', label='Actual time series')
+    plt.plot(forecasts_df['date'], forecasts_df['predict'], c='blue', label='Forecast')
+
+    i = len(cutted_df)
+    dates = station_train['date']
+    dates = dates.reset_index()
+    actual_values = np.array(new_forecasts_df['stage_max'])
+    for _ in range(0, val_blocks):
+        deviation = np.std(np.array(new_forecasts_df['predict']))
+        plt.plot([dates.iloc[i]['date'], dates.iloc[i]['date']],
+                 [min(actual_values) - deviation, max(actual_values) + deviation],
+                 c='black', linewidth=1)
+        i += 7
+
+    plt.xlabel('Дата', fontsize=15)
+    plt.ylabel('Максимальное значение уровня, см', fontsize=15)
+    start_view_point = len(station_train) - horizon - 360
+    plt.xlim(dates.iloc[start_view_point]['date'],
+             dates.iloc[-1]['date'])
+    plt.show()
 
 
 # id станций: 3019, 3027, 3028, 3029, 3030, 3035, 3041, 3045, 3230, 3050
@@ -49,7 +64,7 @@ if __name__ == '__main__':
     path_with_files = '../../data/multi_target'
     df_submit = pd.read_csv('../../submissions/sample_submissions/sample_sub_4.csv', parse_dates=['date'])
 
-    for station_id in [3035]:
+    for station_id in [3030]:
         print(f'\nПредсказание формируется для станции {station_id}')
 
         # Read file with multi-target table for current station
