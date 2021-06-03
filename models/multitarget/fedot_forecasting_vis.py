@@ -40,7 +40,7 @@ def multi_validation(station_train, val_blocks=3):
     plt.plot(station_train['date'], station_train['stage_max'], c='green', label='Actual time series')
     plt.plot(forecasts_df['date'], forecasts_df['predict'], c='blue', label='Forecast')
 
-    i = len(cutted_df)
+    i = len(cutted_df) - 1
     dates = station_train['date']
     dates = dates.reset_index()
     actual_values = np.array(new_forecasts_df['stage_max'])
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     path_with_files = '../../data/multi_target'
     df_submit = pd.read_csv('../../submissions/sample_submissions/sample_sub_4.csv', parse_dates=['date'])
 
-    for station_id in [3030]:
+    for station_id in [3027]:
         print(f'\nПредсказание формируется для станции {station_id}')
 
         # Read file with multi-target table for current station

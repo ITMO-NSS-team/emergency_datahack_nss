@@ -22,6 +22,7 @@ if __name__ == '__main__':
                                parse_dates=['date'])
 
         df_submit_station = df_submit[df_submit['station_id'] == station_id]
+        station_forecasts = []
         for i in range(0, len(df_submit_station), 7):
             row = df_submit_station.iloc[i]
             current_date_for_pred = row['date']
@@ -38,11 +39,20 @@ if __name__ == '__main__':
             current_level = np.array(station_train['1_day'])[-2]
 
             # Train FEDOT model and make forecast
-            predict = fedot_fit_predict(station_train, station_predict_features)
+            predict = fedot_fit_predict(station_train, station_predict_features,
+                                        num_of_generations=25)
 
             # Функция перерасчета предсказанных значений stage_max в delta_stage_max
             deltas = convert_max_into_delta(current_level, predict)
             forecasts.extend(deltas)
+            station_forecasts.extend(deltas)
+
+        df_submit_station['delta_stage_max'] = station_forecasts
+        path_for_save = '../../submissions/submission_data'
+        file_name = ''.join(('model_2_station_', str(station_id), '_.csv'))
+
+        df_submit_station.to_csv(os.path.join(path_for_save, file_name), index=False)
+
     # Записываем предсказания в датафрейм
     df_submit['delta_stage_max'] = forecasts
     # Сохраняем в файл

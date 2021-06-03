@@ -45,7 +45,7 @@ def validation(chain, predict_input, dates, forecast_length, validation_blocks,
     print(f'RMSE - {mse_metric:.2f}\n')
 
     # Plot time series forecasted
-    plt.plot(dates, source_time_series, c='green', label='Actual time series')
+    plt.plot(dates, source_time_series, c='green')
     start_date = dates.iloc[len(pre_history)]
     end_date = dates.iloc[-1]
     forecast_date_range = pd.date_range(start_date['date'], end_date['date'])
