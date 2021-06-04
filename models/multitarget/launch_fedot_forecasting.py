@@ -8,11 +8,12 @@ from models.calculate_levels import convert_max_into_delta
 warnings.filterwarnings('ignore')
 
 
+# id станций: 3019, 3027, 3028, 3029, 3030, 3035, 3041, 3045, 3230, 3050
 if __name__ == '__main__':
     path_with_files = '../../data/multi_target'
     df_submit = pd.read_csv('../../submissions/sample_submissions/sample_sub_4.csv', parse_dates=['date'])
 
-    for station_id in df_submit['station_id'].unique():
+    for station_id in [3027]:
         print(f'\nПредсказание формируется для станции {station_id}')
 
         # Read file with multi-target table for current station
@@ -46,7 +47,7 @@ if __name__ == '__main__':
             station_forecasts.extend(deltas)
 
         df_submit_station['delta_stage_max'] = station_forecasts
-        path_for_save = '../../submissions/submission_data'
+        path_for_save = '../../submissions/submission_data/reg_model_2'
         file_name = ''.join(('model_2_station_', str(station_id), '_.csv'))
 
         df_submit_station.to_csv(os.path.join(path_for_save, file_name), index=False)

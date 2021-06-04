@@ -45,7 +45,7 @@ if __name__ == '__main__':
             forecasts.extend(deltas)
 
         df_submit_station['delta_stage_max'] = forecasts
-        path_for_save = '../../submissions/submission_data'
+        path_for_save = '../../submissions/submission_data/ts_model_1'
         file_name = ''.join(('model_1_station_', str(station_id), '_.csv'))
 
         df_submit_station.to_csv(os.path.join(path_for_save, file_name), index=False)
