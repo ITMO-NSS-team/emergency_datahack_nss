@@ -12,7 +12,10 @@ There were implemented ensemble model with several blocks:
     - Time series forecasting 
     - Multioutput regression
     - Physical modelling 
-    
+
+Example of forecasts, obtained from "Time series forecasting" model (blue line) and "Multioutput regression" model (red line) can be seen at the plot:
+<img src="./media/fedot_levels.png" width="700"/>
+
 The [FEDOT](https://github.com/nccr-itmo/FEDOT) framework was used for forecasting.  
 The main concept of the approach can be seen at the picture above.
 

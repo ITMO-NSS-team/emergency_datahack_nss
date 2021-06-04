@@ -10,7 +10,7 @@ from pylab import rcParams
 rcParams['figure.figsize'] = 15, 7
 
 
-def multi_validation(station_train, val_blocks=10):
+def multi_validation(station_train, val_blocks=3):
     horizon = val_blocks * 7
     cutted_df = station_train.head(len(station_train) - horizon)
     val_df = station_train.tail(horizon)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     path_with_files = '../../data/multi_target'
     df_submit = pd.read_csv('../../submissions/sample_submissions/sample_sub_4.csv', parse_dates=['date'])
 
-    for station_id in [3035]:
+    for station_id in [3230]:
         print(f'\nПредсказание формируется для станции {station_id}')
 
         # Read file with multi-target table for current station
