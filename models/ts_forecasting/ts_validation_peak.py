@@ -7,7 +7,7 @@ from models.ts_forecasting.ts_forecasting_algs import *
 # Imports for creating plots
 import matplotlib.pyplot as plt
 from pylab import rcParams
-rcParams['figure.figsize'] = 15, 7
+rcParams['figure.figsize'] = 11, 7
 
 ################################################################################
 #     Ниже приведен алгоритм валидации прогнозирования временного ряда на      #
@@ -65,6 +65,7 @@ def validation(chain, predict_input, dates, forecast_length, validation_blocks,
              dates.iloc[-1]['date'])
     plt.xlabel('Дата', fontsize=15)
     plt.ylabel('Максимальное значение уровня, см', fontsize=15)
+    plt.grid()
     plt.show()
 
 

@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 from models.multitarget.fedot_algs import dataframe_into_inputs, fedot_fit
 from pylab import rcParams
-rcParams['figure.figsize'] = 15, 7
+rcParams['figure.figsize'] = 11, 7
 
 
 def multi_validation(station_train, val_blocks=3):
@@ -56,6 +56,7 @@ def multi_validation(station_train, val_blocks=3):
     start_view_point = len(station_train) - horizon - 360
     plt.xlim(dates.iloc[start_view_point]['date'],
              dates.iloc[-1]['date'])
+    plt.grid()
     plt.show()
 
 
