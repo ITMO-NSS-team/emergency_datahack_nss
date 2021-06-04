@@ -18,7 +18,7 @@ id станций: 3019, 3027, 3028, 3029, 3030, 3035, 3041, 3045, 3230, 3050
 meteo_df = pd.read_csv('../../first_data/track_2_package/meteo_1day.csv')
 meteo_df['date'] = pd.to_datetime(meteo_df['date'])
 
-stations_df = pd.read_csv('../../first_data/track_2_package/train.csv')
+stations_df = pd.read_csv('../../data/4rd_checkpoint/no_gaps_train.csv')
 stations_df['date'] = pd.to_datetime(stations_df['date'])
 
 # Для каждого гидрологического поста производим интерполяцию
