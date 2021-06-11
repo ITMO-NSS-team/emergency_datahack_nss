@@ -65,7 +65,6 @@ def model_equation(params, variables):
         physical variables of the runoff model
         variables[0] - degree days, variables[1] - fractional snow cover, variables[2] - watershed area,
         variables[3] - rainfall, variables[4] - discharge, variables[5] - upstream point data
-
     '''
     k = 10000. / 86400.
     return ((params[0] * params[3] * variables[0] * variables[1] +
@@ -145,7 +144,7 @@ class DischargeModel(object):
                     if isinstance(var, (int, float)):
                         var_temp.append(var)
                     else:
-                        var_temp.append(var[indexes])  # , :
+                        var_temp.append(var[indexes])
                 self.cluster_params[cluster_label] = optimize.differential_evolution(opt_equation, bounds,
                                                                                      args=var_temp)
 
@@ -161,7 +160,6 @@ class DischargeModel(object):
     def predict_period(self, variables, meteodata, period=None):
         '''
         period = meteodata.shape[0]
-
         '''
 
         if period is None:
@@ -172,8 +170,73 @@ class DischargeModel(object):
 
         for idx in np.arange(preds.size):
             preds[idx] = self.predict_1day(variables, meteodata[idx, :])
-            variables = list(variables);
+            variables = list(variables)
             variables[4] = preds[idx]
             variables = tuple(variables)
 
         return preds
+
+
+def rainfall_convert(total_precip, temps):
+    rainfall = np.empty_like(total_precip)
+    for idx in np.arange(total_precip.size):
+        rainfall[idx] = total_precip[idx] if temps[idx] > 0 else 0
+
+    return rainfall
+
+
+def get_const_for_3045():
+    params = {'area': 897000 - 770000,
+              'section_to': 5700,
+              'lapse': 0.65,
+              'h_mean': 360.0,
+              'h_st': 98.0}
+    return params
+
+
+def fit_3045_phys_model(meteo_spring):
+    """
+    Функция обучает физическую модель для гидрологического поста номер 3045
+    """
+    # Получим постоянные для данного пункта
+    params = get_const_for_3045()
+    area = params['area']
+    section_to = params['section_to']
+    lapse = params['lapse']
+    h_mean = params['h_mean']
+    h_st = params['h_st']
+
+    dm = DischargeModel()
+
+    # Датафрейм с значениями расходов по станциями
+    river = pd.read_csv('../../data/4rd_checkpoint/no_gaps_train.csv', parse_dates=['date'])
+    columns = ['date', 'station_id', 'discharge']
+    river_3042 = river[river.station_id == 3042][columns]
+    river_3036 = river[river.station_id == 3036][columns]
+    # Оставляем только значения расходов
+    rivers = pd.merge(left=river_3042, right=river_3036, how='inner',
+                      on='date', suffixes=('_3042', '_3036'))[['date', 'discharge_3042', 'discharge_3036']]
+    # Объединяем датафреймы с расходами и метеопараметрами
+    data_full = pd.merge(left=meteo_spring, right=rivers, how='left', on='date')
+    data_meteo = data_full[['snow_height', 'snow_coverage_station',
+                            'air_temperature', 'relative_humidity',
+                            'pressure', 'wind_direction', 'wind_speed_aver',
+                            'precipitation']].to_numpy()
+
+    temps = data_full.air_temperature.to_numpy()
+    degree_days = temps + lapse * (h_mean - h_st) * 0.01
+    temps = data_full.air_temperature.to_numpy()
+    degree_days = temps + lapse * (h_mean - h_st) * 0.01
+    snow_cover = data_full.snow_coverage_station.to_numpy()
+    total_precip = data_full.precipitation.to_numpy()
+
+    # Модифицируем значения осадков
+    rainfall = rainfall_convert(total_precip, temps)
+
+    upstream_discharge = data_full.discharge_3036.to_numpy()
+    station_discharge = data_full.discharge_3042.to_numpy()
+    variables = (degree_days[:section_to], snow_cover[:section_to], area, rainfall[:section_to],
+                 station_discharge[:section_to], upstream_discharge[:section_to])
+    dm.get_params(variables, data_meteo[:section_to])
+
+    return dm

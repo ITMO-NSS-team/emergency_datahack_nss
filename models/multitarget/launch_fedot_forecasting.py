@@ -13,7 +13,7 @@ if __name__ == '__main__':
     path_with_files = '../../data/multi_target'
     df_submit = pd.read_csv('../../submissions/sample_submissions/sample_sub_4.csv', parse_dates=['date'])
 
-    for station_id in [3035]:
+    for station_id in [3050]:
         print(f'\nПредсказание формируется для станции {station_id}')
 
         # Read file with multi-target table for current station
