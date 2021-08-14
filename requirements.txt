@@ -1,5 +1,4 @@
-git+git://github.com/nccr-itmo/FEDOT@multitarget#egg=fedot
-fedot==0.3.1
+git+git://github.com/nccr-itmo/FEDOT.git@8dab3faaa69f9a9cd2ce383039048376ac84df5b
 pandas>=1.1.0
 numpy
 seaborn
